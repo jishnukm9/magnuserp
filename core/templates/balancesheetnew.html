@@ -2,6 +2,14 @@
 {% load custom_filters %}
 {% block content %}
 
+<style>
+  .custom-header {
+        background-color: #f8f9fa;
+        color: #333333;
+        font-weight: bold;
+    }
+
+</style>
 
 <div class="main-panel">
   <div class="content-wrapper">
@@ -11,55 +19,34 @@
           <div class="d-sm-flex align-items-center justify-content-between border-bottom pb-3">
             <nav class="nav nav-borders">
               <a class="nav-link active ps-0 pe-0 ms-0 me-3" style="color: #4555B9; border-bottom:2px solid #4555B9; font-weight: 500;" href="">
-                Brand List
+                Balancesheet
               </a>
-              <a class="nav-link ps-0 pe-0 ms-3 me-3" style="color:#444;" href="{% url 'brandform' %}">
-                Brand Entry
-              </a>  
+             
             </nav>
           </div>
           <br />
 
           <div class="card shadow-sm mb-4" style="border-radius:8px; border:1px solid #e9ecef;">
-            <div class="card-header py-3 bg-white">
-              <h5 class="mb-0 font-weight-bold" style="color:#2c2e2f">
-                <i class="fas fa-balance-scale me-2"></i>
-                <strong>Balance Sheet</strong>
-              </h5>
+            
+            <div class="card-header py-3 d-flex justify-content-between bg-white">
+              <h5 class="m-0 font-weight-bold " style="color:#2c2e2f"> <strong>Balance Sheet</strong> </h5>
+          
+              <div class="d-flex align-items-center gap-3">
+  
+                        
+                <i id="fa-magnifying-glass-moneyreciept"   data-toggle="modal" data-target="#balancesheetsearch" class="fa-solid fa-magnifying-glass  fs-4"></i>
+  
+                <a class="moneyreciept-clear" href="{% url 'balancesheet_new' %}">Clear</a>
+             </div>
             </div>
             <div class="card-body p-4">
+              
+              <div>
+
+                <p><strong>Stard Date</strong> : {{startdate_text}}, <strong>End Date</strong> : {{enddate_text}} </p>
+            </div>
               <!-- Filter Controls -->
-              <div class="row mb-4">
-                <div class="col-md-3">
-                  <div class="form-group">
-                    <label class="form-label text-muted fw-semibold">From</label>
-                    <input type="date" class="form-control shadow-none" value="2024-11-15" 
-                           style="border-radius: 6px; border-color: #dee2e6;">
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="form-group">
-                    <label class="form-label text-muted fw-semibold">To</label>
-                    <input type="date" class="form-control shadow-none" value="2024-11-15"
-                           style="border-radius: 6px; border-color: #dee2e6;">
-                  </div>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                  <div class="form-check">
-                    <input type="checkbox" class="form-check-input shadow-none" id="expandAll"
-                           style="cursor: pointer;">
-                    <label class="form-check-label text-muted fw-semibold" for="expandAll">
-                      Expand All
-                    </label>
-                  </div>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                  <button class="btn btn-primary px-4 fw-semibold shadow-sm" 
-                          style="background: #4555B9; border: none; border-radius: 6px;">
-                    <i class="fas fa-file-alt me-2"></i>Generate Report
-                  </button>
-                </div>
-              </div>
+              
 
               <!-- Balance Tables -->
               <div class="row">
@@ -67,9 +54,9 @@
                 <div class="col-md-6">
                   <!-- Liabilities Table -->
                   <div class="table-responsive mb-4">
-                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
-                      <thead>
-                        <tr style="background-color: #f8f9fa;">
+                    <table class="table table-bordered">
+                      <thead  class="custom-header">
+                        <tr >
                           <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
                             Liabilities
                           </th>
@@ -83,7 +70,7 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -92,7 +79,7 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -100,35 +87,37 @@
 
                         <tr>
                           <td class="fw-bold fs-7 py-3">Account Payable</td>
+                          <td></td>
                         </tr>
                         {% for item in account_payable_list %}
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
 
-                        <tr>
+                        <!-- <tr>
                           <td class="fw-bold fs-7 py-3">
 
                           </td>
-                        </tr>
+                        </tr> -->
                         <tr>
                           <td class="fw-bold fs-7 py-3">Tax Payable</td>
+                          <td></td>
                         </tr>
                         <tr>
                           <td class="py-3 px-4 align-middle">Sale Tax Payable</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ sale_tax_payable }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ sale_tax_payable | floatformat:2 }}</td>
                         </tr>
                         <tr>
                           <td class="py-3 px-4 align-middle">Less: Tax on Sales Returns</td>
-                          <td class="py-3 px-4 text-end align-middle">({{ sale_return_tax }})</td>
+                          <td class="py-3 px-4 text-end align-middle">({{ sale_return_tax | floatformat:2 }})</td>
                         </tr>
                         <tr>
                           <td class="py-3 px-4 align-middle">Service Tax Payable</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ service_tax_payable }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ service_tax_payable | floatformat:2 }}</td>
                         </tr>
 
 
@@ -140,7 +129,7 @@
 
                         <tr class="table-light fw-bold">
                           <td class="py-3 px-4 align-middle">Total Liabilities</td>
-                          <td class="py-3 px-4 text-end align-middle">{{total_liability}}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{total_liability | floatformat:2}}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -148,9 +137,9 @@
 
                   <!-- Equity Table -->
                   <div class="table-responsive">
-                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
-                      <thead>
-                        <tr style="background-color: #f8f9fa;">
+                    <table class="table table-bordered" >
+                      <thead  class="custom-header">
+                        <tr >
                           <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
                             Equity
                           </th>
@@ -164,7 +153,7 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -172,17 +161,17 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
                         <tr class="table-light fw-bold">
                           <td class="py-3 px- align-middle">Total Equity</td>
-                          <td class="py-3 px- text-end align-middle">{{total_equity}}</td>
+                          <td class="py-3 px- text-end align-middle">{{total_equity | floatformat:2}}</td>
                         </tr>
                         <tr class="table-secondary fw-bold">
                           <td class="py-3 px- align-middle">Total Liabilities and Equity</td>
-                          <td class="py-3 px- text-end align-middle">{{total_liability_equity}}</td>
+                          <td class="py-3 px- text-end align-middle">{{total_liability_equity | floatformat:2}}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -192,9 +181,9 @@
                 <!-- Assets Table -->
                 <div class="col-md-6">
                   <div class="table-responsive">
-                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
-                      <thead>
-                        <tr style="background-color: #f8f9fa;">
+                    <table class="table table-bordered" >
+                      <thead  class="custom-header">
+                        <tr >
                           <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
                             Assets
                           </th>
@@ -206,12 +195,13 @@
                       <tbody>
                         <tr>
                           <td class="fw-bold fs-7 py-3">Cash In Hand</td>
+                          <td></td>
                         </tr>
                         {% for item in asset %}
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -219,7 +209,7 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -228,7 +218,7 @@
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -236,39 +226,41 @@
 
                         <tr>
                           <td class="fw-bold fs-7 py-3">Account Receivable</td>
+                          <td></td>
                         </tr>
 
                         {% for item in account_receivable %}
                         {% for key, value in item.items %}
                         <tr>
                           <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value | floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
 
-                        <tr>
+                        <!-- <tr>
                           <td class="fw-bold fs-7 py-3">
 
                           </td>
-                        </tr>
+                        </tr> -->
                         <tr>
                           <td class="fw-bold fs-7 py-3">Tax Receivable</td>
+                          <td></td>
                         </tr>
                         <tr>
                           <td class="py-3 px-4 align-middle">Purchase Tax Receivable</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ purchase_tax_receivable }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ purchase_tax_receivable | floatformat:2 }}</td>
                         </tr>
                         <tr>
                           <td class="py-3 px-4 align-middle">Less: Tax on Purchase Returns</td>
-                          <td class="py-3 px-4 text-end align-middle">({{ purchase_return_tax }})</td>
+                          <td class="py-3 px-4 text-end align-middle">({{ purchase_return_tax | floatformat:2 }})</td>
                         </tr>
 
 
                         
                         <tr class="table-light fw-bold">
                           <td class="py-3 px-4 align-middle">Total Assets</td>
-                          <td class="py-3 px-4 text-end align-middle">{{total_asset}}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{total_asset | floatformat:2}}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -279,6 +271,74 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" tabindex="-1" id="balancesheetsearch">
+  <div class="modal-dialog">
+    <div class="modal-content w-100">
+      <div
+        class="modal-header d-flex justify-content-between align-items-center m"
+      >
+        <h5 class="modal-title"><strong>Search Balance Sheet</strong></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+      </div>
+    
+      <form action="{% url 'balancesheet_new' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+           
+       
+
+            <div class="form-group">
+              <label class=" mb-2" for="">  <strong>Start Date</strong>      </label>
+              <div id="datepicker" 
+                        
+           class="input-group date datepicker-field" 
+           data-date-format="dd-mm-yyyy">
+          <input class="form-control " 
+          name="startdate"
+          autocomplete="off" 
+          
+                 type="text"  />
+          <span class="input-group-addon">
+              <i class="glyphicon glyphicon-calendar"></i>
+          </span>
+      </div>
+            </div>
+            <div class="form-group">
+              <label class=" mb-2" for="">  <strong>End Date</strong>      </label>
+              <div id="datepicker" 
+                        
+           class="input-group date datepicker-field" 
+           data-date-format="dd-mm-yyyy">
+          <input class="form-control " 
+          name="enddate"
+          autocomplete="off" 
+          
+                 type="text"  />
+          <span class="input-group-addon">
+              <i class="glyphicon glyphicon-calendar"></i>
+          </span>
+      </div>
+            </div>
+           
+         </div>
+         <div class="modal-footer">
+
+
+
+        
+           <button type="submit" class="btn btn-primary">Search</button>
+         </div>
+      </form>
+      
+     
     </div>
   </div>
 </div>

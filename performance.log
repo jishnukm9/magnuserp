@@ -393,3 +393,6 @@ DEBUG 2024-11-19 08:54:47,853 views 2389 123145455411200 Form submission took 4.
 WARNING 2024-11-19 08:54:47,854 custom_middleware 2389 123145455411200 Slow request: /addservice/ took 4.84 seconds.
 WARNING 2024-11-19 08:58:10,329 custom_middleware 2389 123145539358720 Slow request: /servicebillingcheckout/SR1/ took 4.79 seconds.
 WARNING 2024-11-19 09:35:32,392 custom_middleware 4086 123145445507072 Slow request: /addsale/ took 4.90 seconds.
+DEBUG 2024-11-20 11:14:49,479 views 2716 21212 Service entry form submission start SR1
+DEBUG 2024-11-20 11:14:49,758 views 2716 21212 Service entry form submission end
+DEBUG 2024-11-20 11:14:49,761 views 2716 21212 Form submission took 0.28 seconds.

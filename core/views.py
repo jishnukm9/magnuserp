@@ -28063,10 +28063,551 @@ def all_in_one_report(request):
 
 
 
+def func_get_transaction_for_balancesheet(startdate,enddate,request):
+
+    currentuser = request.user
+    transaction = []
+
+    filters = Q()
+
+    if not currentuser.is_superuser:
+        filters &= Q(branch=currentuser.userprofile.branch)
+
+    if filters:
+        transaction = Transaction.objects.filter(filters).order_by("-pk")
+
+    invoicenumber_list = set()
+    accounts_list = set()
+
+    if currentuser.is_superuser:
+        transactions_all = Transaction.objects.all().order_by("-pk")
+    else:
+        transactions_all = Transaction.objects.filter(
+            branch=currentuser.userprofile.branch
+        ).order_by("-pk")
+    for trans in transactions_all:
+        accounts_list.add(trans.accounts)
+        invoicenumber_list.add(trans.invoice_number)
+
+    transaction_list = []
+    purchase_due_balance = 0
+    sale_due_balance = 0
+    service_due_balance = 0
+
+    search='Yes'
+    total_debit = 0
+    total_credit = 0
+    
+    for tr in transaction:
+        if tr.transactiontype == "purchase":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            if currentuser.is_superuser:
+
+                purchase_p = Purchase.objects.filter(purchaseid=transactionid).first()
+                if not purchase_p:
+                    pass
+                else:
+                    ###########
+                    if purchase_p.duebalance:
+                        purchase_due_balance += purchase_p.duebalance
+                    ###########
+
+                    invoicenumber_list.add(purchase_p.invoicenumber)
+                    accounts_list.add(purchase_p.supplier.name)
+                    transaction_dict["invoicenumber"] = purchase_p.invoicenumber
+                    transaction_dict["accounts"] = purchase_p.supplier.name
+                    transaction_dict["paymentmode"] = tr.paymentmode
+                    transaction_dict["transaction"] = tr
+                    transaction_dict["branch"] = tr.branch
+                    transaction_dict["title"] = "Purchase"
+                    transaction_dict["amounttype"] = "Credit"
+                  
+                    transaction_dict['date'] = purchase_p.invoicedate
+               
+
+                    ###############
+                    trans_obj =Transaction.objects.filter(transactionid=purchase_p.purchaseid)
+                    is_first = False
+                    if tr==trans_obj.first():
+                        is_first=True
+                    else:
+                        is_first = False
+
+                    if is_first:
+                        transaction_dict['createddate'] = purchase_p.invoicedate
+                    else:
+                        transaction_dict['createddate'] = tr.createddate
+                    ###############
+
+                    transaction_list.append(transaction_dict)
+                purchase_b = BranchPurchase.objects.filter(
+                    purchaseid=transactionid
+                ).first()
+                if not purchase_b:
+                    pass
+                else:
+                    ###########
+                    if purchase_b.duebalance:
+                        purchase_due_balance += purchase_b.duebalance
+                    ###########
+                    invoicenumber_list.add(purchase_b.invoicenumber)
+                    if purchase_b.supplier == None:
+                        accounts_list.add(purchase_b.externalsupplier.name)
+                    else:
+                        accounts_list.add(purchase_b.supplier.name)
+                    transaction_dict["invoicenumber"] = purchase_b.invoicenumber
+                    if purchase_b.supplier == None:
+                        transaction_dict["accounts"] = purchase_b.externalsupplier.name
+                    else:
+                        transaction_dict["accounts"] = purchase_b.supplier.name
+                    transaction_dict["paymentmode"] = tr.paymentmode
+                    transaction_dict["transaction"] = tr
+                    transaction_dict["branch"] = tr.branch
+                    transaction_dict["title"] = "Purchase"
+                    transaction_dict["amounttype"] = "Credit"
+                  
+                    transaction_dict['date'] = purchase_b.invoicedate
+
+                   
+
+                    ###############
+                    trans_obj =Transaction.objects.filter(transactionid=purchase_b.purchaseid)
+                    is_first = False
+                    if tr==trans_obj.first():
+                        is_first=True
+                    else:
+                        is_first = False
+                   
+                    if is_first:
+                        transaction_dict['createddate'] = purchase_b.invoicedate
+                    else:
+                        transaction_dict['createddate'] = tr.createddate
+                    ###############
+
+                    transaction_list.append(transaction_dict)
+
+            else:
+                purchase = BranchPurchase.objects.filter(
+                    purchaseid=transactionid
+                ).first()
+                if not purchase:
+                    pass
+                else:
+
+                    ###########
+                    if purchase.duebalance:
+                        purchase_due_balance += purchase.duebalance
+                    ###########
+
+                    invoicenumber_list.add(purchase.invoicenumber)
+                    if purchase.supplier == None:
+                        accounts_list.add(purchase.externalsupplier.name)
+                    else:
+                        accounts_list.add(purchase.supplier.name)
+                    transaction_dict["invoicenumber"] = purchase.invoicenumber
+                    if purchase.supplier == None:
+                        transaction_dict["accounts"] = purchase.externalsupplier.name
+                    else:
+                        transaction_dict["accounts"] = purchase.supplier.name
+                    transaction_dict["paymentmode"] = tr.paymentmode
+                    transaction_dict["transaction"] = tr
+                    transaction_dict["branch"] = tr.branch
+                    transaction_dict["title"] = "Purchase"
+                    transaction_dict["amounttype"] = "Credit"
+               
+                    transaction_dict['date'] = purchase.invoicedate
+
+                 
+
+                    ###############
+                    trans_obj =Transaction.objects.filter(transactionid=purchase.purchaseid)
+                    is_first = False
+                    if tr==trans_obj.first():
+                        is_first=True
+                    else:
+                        is_first = False
+                   
+                    if is_first:
+                        transaction_dict['createddate'] = purchase.invoicedate
+                    else:
+                        transaction_dict['createddate'] = tr.createddate
+                    ###############
+
+                    transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "purchasereturn":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            # if currentuser.is_superuser:
+
+            purchase_p = PurchaseReturn.objects.filter(
+                purchasereturnid=transactionid
+            ).first()
+            if not purchase_p:
+                pass
+            else:
+                invoicenumber_list.add(purchase_p.invoicenumber)
+                if purchase_p.supplier == None:
+                    accounts_list.add(purchase_p.externalsupplier.name)
+                else:
+                    accounts_list.add(purchase_p.supplier.name)
+                transaction_dict["invoicenumber"] = purchase_p.invoicenumber
+                if purchase_p.supplier == None:
+                    transaction_dict["accounts"] = purchase_p.externalsupplier.name
+                else:
+                    transaction_dict["accounts"] = purchase_p.supplier.name
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Purchase Return"
+                transaction_dict["amounttype"] = "Debit"
+              
+                transaction_dict['date'] = purchase_p.createddate
+
+       
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=purchase_p.purchasereturnid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = purchase_p.createddate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "sale":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            sale = Sale.objects.filter(saleid=transactionid).first()
+            if not sale:
+                pass
+            else:
+                ###########
+                if sale.duebalance:
+                    sale_due_balance += sale.duebalance
+                ###########
+                invoicenumber_list.add(sale.invoicenumber)
+                accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = sale.invoicenumber
+                transaction_dict["accounts"] = sale.customer
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Sale"
+                transaction_dict["amounttype"] = "Debit"
+              
+                transaction_dict['date'] = sale.invoicedate
+
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=sale.saleid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = sale.invoicedate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "salereturn":
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            sale = SaleReturn.objects.filter(salereturnid=transactionid).first()
+            if not sale:
+                pass
+            else:
+                invoicenumber_list.add(sale.invoicenumber)
+                accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = sale.invoicenumber
+                transaction_dict["accounts"] = sale.customer
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Sale Return"
+                transaction_dict["amounttype"] = "Credit"
+               
+                transaction_dict['date'] = sale.createddate
+
+              
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=sale.salereturnid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = sale.createddate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "expense":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            expense = Expenses.objects.filter(expenseid=transactionid).first()
+            if not expense:
+                pass
+            else:
+                invoicenumber_list.add(expense.billnumber)
+                # accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = expense.billnumber
+                transaction_dict["accounts"] = ""
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["remarks"] = expense.remarks
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Expense"
+                transaction_dict["amounttype"] = "Credit"
+             
+                transaction_dict['date'] = expense.expensedate
+
+           
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=expense.expenseid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = expense.expensedate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "payment":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            payment = Payments.objects.filter(paymentid=transactionid).first()
+            if not payment:
+                pass
+            else:
+                invoicenumber_list.add(payment.referenceno)
+                # accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = payment.referenceno
+                transaction_dict["accounts"] = payment.debitaccount
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["remarks"] = payment.description
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Payment"
+                transaction_dict["amounttype"] = "Credit"
+              
+                transaction_dict['date'] = payment.paymentdate
+
+             
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=payment.paymentid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = payment.paymentdate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "receipt":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            receipt = Receipts.objects.filter(receiptid=transactionid).first()
+            if not receipt:
+                pass
+            else:
+                invoicenumber_list.add(receipt.referenceno)
+                # accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = receipt.referenceno
+                transaction_dict["accounts"] =receipt.creditaccount
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["remarks"] = receipt.description
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Receipt"
+                transaction_dict["amounttype"] = "Debit"
+             
+                transaction_dict['date'] = receipt.receiptdate
+
+      
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=receipt.receiptid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = receipt.receiptdate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "journal":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            journal = Journals.objects.filter(journalid=transactionid).first()
+            if not journal:
+                pass
+            else:
+                invoicenumber_list.add(journal.referenceno)
+                # accounts_list.add(sale.customer)
+                transaction_dict["invoicenumber"] = journal.referenceno
+                transaction_dict["accounts"] = ""
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["remarks"] = journal.description
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Journal"
+                transaction_dict["amounttype"] = ""
+                transaction_dict['date'] = journal.journaldate
+         
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=journal.journalid)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = journal.journaldate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+        if tr.transactiontype == "service":
+
+            transactionid = tr.transactionid
+            transaction_dict = {}
+            # expense =Expenses.objects.filter(expenseid = transactionid).first()
+            service = Service.objects.filter(servicerefnumber=transactionid).first()
+            if not service:
+                pass
+            else:
+
+                ###########
+                if service.duebalance:
+                    service_due_balance += service.duebalance
+                ###########
+
+                invoicenumber_list.add(service.servicerefnumber)
+                accounts_list.add(f"{service.firstname} {service.lastname}")
+                transaction_dict["invoicenumber"] = service.servicerefnumber
+                transaction_dict["accounts"] = f"{service.firstname} {service.lastname}"
+                transaction_dict["paymentmode"] = tr.paymentmode
+                transaction_dict["transaction"] = tr
+                transaction_dict["branch"] = tr.branch
+                transaction_dict["title"] = "Service"
+                transaction_dict["amounttype"] = "Debit"
+             
+                transaction_dict['date'] = service.memodate
+           
+
+                ###############
+                trans_obj =Transaction.objects.filter(transactionid=service.servicerefnumber)
+                is_first = False
+                if tr==trans_obj.first():
+                    is_first=True
+                else:
+                    is_first = False
+
+                if is_first:
+                    transaction_dict['createddate'] = service.memodate
+                else:
+                    transaction_dict['createddate'] = tr.createddate
+                ###############
+
+                transaction_list.append(transaction_dict)
+
+
+    # if request.method == 'POST':
+        # if startdate:
+        #     startdate = datetime.strptime(startdate, "%d-%m-%Y").date()
+
+        # if enddate:
+        #     enddate = datetime.strptime(enddate, "%d-%m-%Y").date()
+
+    if startdate and enddate:
+        transaction_list  = sorted(
+        [
+            transaction for transaction in transaction_list 
+            if startdate <= transaction['createddate'] <= enddate
+        ],
+        key=lambda x: x['createddate'],
+        reverse=False
+        )
+    else:
+        transaction_list = sorted(
+        transaction_list,
+        key=lambda x: x['createddate'],
+        reverse=False
+    )
+
+    return transaction_list
+
+
+
+
 def balancesheet(request):
 
 
+
+    if request.method == 'POST':
+        startdate = request.POST.get('startdate')
+        enddate = request.POST.get('enddate')
+        startdate = datetime.strptime(startdate, "%d-%m-%Y").date()
+        enddate = datetime.strptime(enddate, "%d-%m-%Y").date()
+    else:
+        startdate = date.today()
+        enddate = date.today()
+
+    startdate_text = startdate
+    enddate_text = enddate
+
     currentuser = request.user
+    homebranch = UserProfile.objects.get(user=request.user).branch
 
     equity_total = 0
     liability_total = 0
@@ -28083,57 +28624,61 @@ def balancesheet(request):
     upi_credit = 0
     upi_debit = 0
 
-    transaction_obj = Transaction.objects.all()
+    # transaction_obj = Transaction.objects.filter(branch=homebranch)
+
+    transaction_obj = func_get_transaction_for_balancesheet(startdate,enddate,request)
+
+    # print('transaction today',transaction_obj)
     for trans in transaction_obj:
         credit_or_debit = 'credit'
-        if trans.transactiontype == 'purchase':
+        if trans['transaction'].transactiontype == 'purchase':
             credit_or_debit = 'credit'
-        elif trans.transactiontype == 'purchasereturn':
+        elif trans['transaction'].transactiontype == 'purchasereturn':
             credit_or_debit = 'debit'
-        elif trans.transactiontype == 'sale':
+        elif trans['transaction'].transactiontype == 'sale':
             credit_or_debit = 'debit'
-        elif trans.transactiontype == 'salereturn':
+        elif trans['transaction'].transactiontype == 'salereturn':
             credit_or_debit = 'credit'
-        elif trans.transactiontype == 'service':
+        elif trans['transaction'].transactiontype == 'service':
             credit_or_debit = 'debit'
-        elif trans.transactiontype == 'payment':
+        elif trans['transaction'].transactiontype == 'payment':
             credit_or_debit = 'credit'
-        elif trans.transactiontype == 'receipt':
+        elif trans['transaction'].transactiontype == 'receipt':
             credit_or_debit = 'debit'
         else:
             pass
 
 
         # All possible combinations
-        if trans.paymentmode == 'Cash':
+        if trans['transaction'].paymentmode == 'Cash':
             if credit_or_debit == 'credit':
-                cash_credit += trans.amount
+                cash_credit += trans['transaction'].amount
             elif credit_or_debit == 'debit':
-                cash_debit += trans.amount
+                cash_debit += trans['transaction'].amount
 
-        elif trans.paymentmode == 'Bank':
+        elif trans['transaction'].paymentmode == 'Bank':
             if credit_or_debit == 'credit':
-                bank_credit += trans.amount
+                bank_credit += trans['transaction'].amount
             elif credit_or_debit == 'debit':
-                bank_debit += trans.amount
+                bank_debit += trans['transaction'].amount
 
-        elif trans.paymentmode == 'UPI':
+        elif trans['transaction'].paymentmode == 'UPI':
             if credit_or_debit == 'credit':
-                upi_credit += trans.amount
+                upi_credit += trans['transaction'].amount
             elif credit_or_debit == 'debit':
-                upi_debit += trans.amount
+                upi_debit += trans['transaction'].amount
 
-        elif trans.paymentmode == 'Card':
+        elif trans['transaction'].paymentmode == 'Card':
             if credit_or_debit == 'credit':
-                card_credit += trans.amount
+                card_credit += trans['transaction'].amount
             elif credit_or_debit == 'debit':
-                card_debit += trans.amount
+                card_debit += trans['transaction'].amount
 
-        elif trans.paymentmode == 'Card':
-            if credit_or_debit == 'credit':
-                card_credit += trans.amount
-            elif credit_or_debit == 'debit':
-                card_debit += trans.amount
+        # elif trans['transaction'].paymentmode == 'Card':
+        #     if credit_or_debit == 'credit':
+        #         card_credit += trans['transaction'].amount
+        #     elif credit_or_debit == 'debit':
+        #         card_debit += trans['transaction'].amount
         else:
             pass
     CASH_ACCOUNT = cash_debit-cash_credit
@@ -28176,7 +28721,8 @@ def balancesheet(request):
     payment_list_liability = []
     payment_list_equity = []
     # Process all payments
-    payments_obj = Payments.objects.all()
+    payments_obj = Payments.objects.filter(Q(branch=homebranch)& Q(paymentdate__gte=startdate)
+        & Q(paymentdate__lte=enddate))
     for pay in payments_obj:
         debit_acc = pay.debitaccount
         acc_key = debit_acc.replace(" ", "_")
@@ -28231,7 +28777,8 @@ def balancesheet(request):
     receipt_list_liability = []
     receipt_list_equity = []
     # Process all receipts
-    receipts_obj = Receipts.objects.all()
+    receipts_obj = Receipts.objects.filter(Q(branch=homebranch)& Q(receiptdate__gte=startdate)
+        & Q(receiptdate__lte=enddate))
     for receipt in receipts_obj:
         credit_acc = receipt.creditaccount
         acc_key = credit_acc.replace(" ", "_")
@@ -28270,31 +28817,11 @@ def balancesheet(request):
     for acc_key, amount in equity_accounts.items():
         receipt_list_equity.append({acc_key: amount})
 
-    # receipt_list_asset = []
-    # receipt_list_liability = []
-    # receipt_list_equity = []
-    # receipts_obj = Receipts.objects.all()
-    # for pay in receipts_obj:
-    #     receipt_dict = {}
-    #     credit_acc = pay.creditaccount
-    #     acc_head = CoASubAccounts.objects.filter(description=credit_acc).first().head_root
-    #     if acc_head in ASSET_SIDE:
-    #         receipt_dict[credit_acc.replace(" ", "_")] = pay.amount
-    #         asset_total += pay.amount
-    #         receipt_list_asset.append(receipt_dict)
-    #     elif acc_head in LIABILITY_SIDE:
-    #         receipt_dict[credit_acc.replace(" ", "_")] = pay.amount
-    #         liability_total += pay.amount
-    #         receipt_list_liability.append(receipt_dict)
-    #     elif acc_head in EQUITY_SIDE:
-    #         receipt_dict[credit_acc.replace(" ", "_")] = pay.amount
-    #         equity_total += pay.amount
-    #         receipt_list_equity.append(receipt_dict)
 
 
-
-    homebranch = UserProfile.objects.get(user=request.user).branch
-    data = Sale.objects.filter(branch=homebranch).order_by("-pk")
+    
+    data = Sale.objects.filter(Q(branch=homebranch)& Q(invoicedate__gte=startdate)
+        & Q(invoicedate__lte=enddate)).order_by("-pk")
 
     saleid_set = set()
     sale_obj = [
@@ -28303,27 +28830,28 @@ def balancesheet(request):
         if (sale.saleid not in saleid_set and not saleid_set.add(sale.saleid))
     ]
 
-    service_obj =Service.objects.all()
+    service_obj =Service.objects.filter(Q(branch=homebranch)& Q(memodate__gte=startdate)
+        & Q(memodate__lte=enddate))
 
     cust_dict={}
     for item in sale_obj:
-        if item.duebalance != 0:
-            if item.customerid in cust_dict.keys():
-                cust_dict[item.customerid] += item.duebalance
-                asset_total += item.duebalance
-            else:
-                cust_dict[item.customerid] = item.duebalance
-                asset_total += item.duebalance
+        # if item.duebalance != 0:
+        if item.customerid in cust_dict.keys():
+            cust_dict[item.customerid] += item.duebalance
+            asset_total += item.duebalance
+        else:
+            cust_dict[item.customerid] = item.duebalance
+            asset_total += item.duebalance
 
     for item in service_obj:
-        if item.duebalance != 0:
-            cust_id = Customers.objects.filter(unique_id=item.customerid).first().id
-            if cust_id in cust_dict.keys():
-                cust_dict[cust_id] += item.duebalance
-                asset_total += item.duebalance
-            else:
-                cust_dict[cust_id] = item.duebalance
-                asset_total += item.duebalance
+        # if item.duebalance != 0:
+        cust_id = Customers.objects.filter(unique_id=item.customerid).first().id
+        if cust_id in cust_dict.keys():
+            cust_dict[cust_id] += item.duebalance
+            asset_total += item.duebalance
+        else:
+            cust_dict[cust_id] = item.duebalance
+            asset_total += item.duebalance
 
     cust_dict = {f"{Customers.objects.filter(id=key).first().firstname}_{Customers.objects.filter(id=key).first().lastname}":value for key,value in cust_dict.items()}
 
@@ -28334,6 +28862,8 @@ def balancesheet(request):
         Q(branch=homebranch)
         & ~Q(purchase_type="transfer")
         & ~Q(purchase_type="stockadd")
+         & Q(invoicedate__gte=startdate)
+        & Q(invoicedate__lte=enddate)
     ).order_by("-pk")
     purchaseid_set = set()
     purchase_obj = [
@@ -28348,14 +28878,14 @@ def balancesheet(request):
  
     sup_dict = {}
     for item in purchase_obj:
-        if item.duebalance != 0:
-            sup_id = Suppliers.objects.filter(id=item.externalsupplier.id).first().id
-            if sup_id in sup_dict.keys():
-                sup_dict[sup_id] += item.duebalance
-                liability_total += item.duebalance
-            else:
-                sup_dict[sup_id] = item.duebalance
-                liability_total += item.duebalance
+        # if item.duebalance != 0:
+        sup_id = Suppliers.objects.filter(id=item.externalsupplier.id).first().id
+        if sup_id in sup_dict.keys():
+            sup_dict[sup_id] += item.duebalance
+            liability_total += item.duebalance
+        else:
+            sup_dict[sup_id] = item.duebalance
+            liability_total += item.duebalance
 
     sup_dict = {f"{Suppliers.objects.filter(id=key).first().name}":value for key,value in sup_dict.items()}
     account_payable_list = [sup_dict]
@@ -28366,33 +28896,34 @@ def balancesheet(request):
 
     sale_tax_payable = 0
     for item in sale_obj:
-        if item.duebalance == 0:
-            sale_tax_payable +=item.totaltax
+        # if item.duebalance == 0:
+        sale_tax_payable +=item.totaltax
     liability_total += sale_tax_payable
 
 
 
     purchase_tax_receivable = 0
     for item in purchase_obj:
-        if item.duebalance == 0:
-            purchase_tax_receivable +=item.totaltax
+        # if item.duebalance == 0:
+        purchase_tax_receivable +=item.totaltax
     asset_total += purchase_tax_receivable
 
 
     service_tax_payable = 0
     for item in service_obj:
-        if item.duebalance == 0:
-            servicerefnum = item.servicerefnumber
-            serv_disc_obj = ServiceDiscountDetails.objects.filter(servicerefnumber=servicerefnum).first()
-            servicetax=serv_disc_obj.servicetaxtotal_afterdiscount
-            sparetax=serv_disc_obj.sparetaxtotal_afterdiscount
-            totaltax = servicetax + sparetax
-            service_tax_payable += totaltax
+        # if item.duebalance == 0:
+        servicerefnum = item.servicerefnumber
+        serv_disc_obj = ServiceDiscountDetails.objects.filter(servicerefnumber=servicerefnum).first()
+        servicetax=serv_disc_obj.servicetaxtotal_afterdiscount
+        sparetax=serv_disc_obj.sparetaxtotal_afterdiscount
+        totaltax = servicetax + sparetax
+        service_tax_payable += totaltax
     liability_total += service_tax_payable
 
 
     purchase_return_tax = 0
-    data = PurchaseReturn.objects.filter(status='Processed')
+    data = PurchaseReturn.objects.filter(Q(status='Processed') & Q(branch=homebranch) & Q(createddate__gte=startdate)
+        & Q(createddate__lte=enddate))
     purchase_return_set = set()
     purchase_return_obj = [
         purchase
@@ -28409,7 +28940,8 @@ def balancesheet(request):
 
 
     sale_return_tax = 0
-    data = SaleReturn.objects.all()
+    data = SaleReturn.objects.filter(Q(branch=homebranch)& Q(createddate__gte=startdate)
+        & Q(createddate__lte=enddate))
     sale_return_set = set()
     sale_return_obj = [
         sale
@@ -28445,7 +28977,9 @@ def balancesheet(request):
     'purchase_return_tax' :purchase_return_tax,
     'service_tax_payable':service_tax_payable ,
     'sale_tax_payable':sale_tax_payable,
-    'purchase_tax_receivable':purchase_tax_receivable
+    'purchase_tax_receivable':purchase_tax_receivable,
+    'startdate_text':startdate_text,
+    'enddate_text':enddate_text,
     }
 
     return render(request,'balancesheetnew.html',context)
@@ -28454,180 +28988,27 @@ def balancesheet(request):
 
 
 
-
-# @login_required
-# def placcountnew(request):
-
-#     if request.method == "POST":
-#         startdate = request.POST["startdate"]
-#         startdate = datetime.strptime(startdate, "%d-%m-%Y")
-
-#         enddate = request.POST["enddate"]
-#         enddate = datetime.strptime(enddate, "%d-%m-%Y")
-#         if request.user.is_superuser:
-#             branch = request.POST["branch"]
-#         else:
-#             branch = request.user.userprofile.branch
-#     else:
-#         # if request.user.is_superuser:
-#         #     all_branches = Branch.objects.filter(
-#         #         Q(branchtype="Own") | Q(branchtype="Franchise") | Q(name="WAREHOUSE")
-#         #     )
-#         # else:
-#         #     all_branches = [request.user.userprofile.branch]
-#         # data = {"branch_list": all_branches}
-#         # return render(request, "placcount.html", data)
-#         startdate = datetime.now()
-#         enddate = datetime.now()
-#         if request.user.is_superuser:
-#             branch = request.POST["branch"]
-#         else:
-#             branch = request.user.userprofile.branch
-#     totalsale = 0
-#     totalpurchase = 0
-#     totalservice = 0
-#     total_indirect_expense = 0
-#     other_income = 0
-#     totalsalereturn = 0
-#     totalpurchasereturn = 0
-#     opening_stock = 0
-#     closing_stock = 0
-#     branchid = Branch.objects.filter(name=branch).first()
-#     cashbook = CashBook.objects.filter(
-#         Q(branch=branch) & Q(date__range=(startdate, enddate))
-#     )
-#     if cashbook:
-#         # take the total sale, purchase and service from the cashbook and expenses from the expense model
-#         # this is because expense is showing individually in the cashbook
-#         df = pd.DataFrame.from_records(cashbook.values())
-#         try:
-#             totalsale = df[df["description"] == "Sale"]["receipt"].sum()
-#         except:
-#             totalsale = 0
-#         try:
-#             totalpurchase = df[df["description"] == "Purchase"]["payment"].sum()
-#         except:
-#             totalpurchase = 0
-#         try:
-#             totalservice = df[df["description"] == "Service"]["receipt"].sum()
-#         except:
-#             totalservice = 0
-
-#         try:
-#             totalsalereturn = df[df["description"] == "Sale Return"]["payment"].sum()
-#         except:
-#             totalsalereturn = 0
-#         try:
-#             totalpurchasereturn = df[df["description"] == "Purchase Return"][
-#                 "receipt"
-#             ].sum()
-#         except:
-#             totalpurchasereturn = 0
-#     payment = Payments.objects.filter(
-#         Q(branch=branchid) & Q(paymentdate__range=(startdate, enddate))
-#     )
-#     if payment:
-#         paymentdf = pd.DataFrame.from_records(payment.values())
-#         total_indirect_expense = paymentdf["amount"].sum()
-#     receipt = Receipts.objects.filter(
-#         Q(branch=branchid) & Q(receiptdate__range=(startdate, enddate))
-#     )
-#     if receipt:
-#         receiptdf = pd.DataFrame.from_records(receipt.values())
-#         other_income = receiptdf["amount"].sum()
-
-#     # Converting the date to datetime with timezone. for now setting timezone UTC as there is no significance of time here instead only date caluclated.
-#     startdate = timezone.make_aware(startdate, timezone=timezone.utc)
-#     opening_added_stock = (
-#         StockTransaction.objects.filter(
-#             Q(branch=branchid)
-#             & Q(transactiontype="Add")
-#             & Q(created_date__lte=startdate)
-#         ).aggregate(total=Sum("transaction_value"))["total"]
-#         or 0
-#     )
-#     opening_consumed_stock = (
-#         StockTransaction.objects.filter(
-#             Q(branch=branchid)
-#             & Q(transactiontype="Sub")
-#             & Q(created_date__lte=startdate)
-#         ).aggregate(total=Sum("transaction_value"))["total"]
-#         or 0
-#     )
-#     opening_stock = opening_added_stock - opening_consumed_stock
-
-#     enddate = timezone.make_aware(enddate, timezone=timezone.utc)
-#     closing_added_stock = (
-#         StockTransaction.objects.filter(
-#             Q(branch=branchid) & Q(transactiontype="Add") & Q(created_date__lte=enddate)
-#         ).aggregate(total=Sum("transaction_value"))["total"]
-#         or 0
-#     )
-#     closing_consumed_stock = (
-#         StockTransaction.objects.filter(
-#             Q(branch=branchid) & Q(transactiontype="Sub") & Q(created_date__lte=enddate)
-#         ).aggregate(total=Sum("transaction_value"))["total"]
-#         or 0
-#     )
-#     closing_stock = closing_added_stock - closing_consumed_stock
-
-#     # Calculate the spare parts cost for a particular period and then calculate the service cost
-#     spare_total = 0
-#     spare_parts = SpareParts.objects.filter(createddate__range=(startdate, enddate))
-#     for row in spare_parts:
-#         spare_total += int(row.price) * int(row.salegst) / 100
-
-#     # Service cost - spare parts cost is the actual service cost
-#     totalservice = totalservice - spare_total
-
-#     debittotal = (
-#         opening_stock + totalpurchase + total_indirect_expense + totalsalereturn
-#     )
-#     credittotal = (
-#         totalservice + totalsale + totalpurchasereturn + closing_stock + other_income
-#     )
-#     profit = 0
-#     loss = 0
-#     if debittotal > credittotal:
-#         loss = debittotal - credittotal
-#     else:
-#         profit = credittotal - debittotal
-#     if request.user.is_superuser:
-#         all_branches = Branch.objects.filter(
-#             Q(branchtype="Own") | Q(branchtype="Franchise") | Q(name="WAREHOUSE")
-#         )
-#     else:
-#         all_branches = [request.user.userprofile.branch]
-
-#     data = {
-#         "totalpurchase": round(totalpurchase, 2),
-#         "totalindirectexpense": round(total_indirect_expense, 2),
-#         "otherincome": round(other_income, 2),
-#         "totalsale": round(totalsale, 2),
-#         "totalservice": round(totalservice, 2),
-#         "totalsalereturn": round(totalsalereturn, 2),
-#         "totalpurchasereturn": round(totalpurchasereturn, 2),
-#         "openingstock": round(opening_stock, 2),
-#         "closingstock": round(closing_stock, 2),
-#         "profit": round(profit, 2),
-#         "loss": round(loss, 2),
-#         "spare_parts_cost": round(spare_total, 2),
-#         "debittotal": round(debittotal, 2),
-#         "credittotal": round(credittotal, 2),
-#         "branch_list": all_branches,
-#     }
-
-#     return render(request, "placcountnew.html", data)
-
-
 @login_required
 def placcountnew(request):
 
+    if request.method == 'POST':
+        startdate = request.POST.get('startdate')
+        enddate = request.POST.get('enddate')
+        startdate = datetime.strptime(startdate, "%d-%m-%Y").date()
+        enddate = datetime.strptime(enddate, "%d-%m-%Y").date()
+    else:
+        startdate = date.today()
+        enddate = date.today()
 
-    startdate = date.today()
-    enddate = date.today()
+    startdate_text = startdate
+    enddate_text = enddate
 
     branch=request.user.userprofile.branch
+
+
+
+    income_total = 0
+    expense_total = 0
 
     #Opening stock Closing stock section
 
@@ -28670,6 +29051,8 @@ def placcountnew(request):
     # Calculate closing stock
     closing_stock = opening_stock + stock_change
 
+    
+
     #Opening stock Closing stock section (STOCK VALUE)
 
     # Convert dates to datetime objects with time component
@@ -28691,6 +29074,8 @@ def placcountnew(request):
 
     opening_stock_value = additions_value_before_start - subtractions_value_before_start
 
+    expense_total += opening_stock_value
+
     # Calculate stock value changes during the period
     additions_value_during_period = StockTransaction.objects.filter(
         created_date__gte=start_datetime,
@@ -28711,12 +29096,241 @@ def placcountnew(request):
     # Calculate closing stock value
     closing_stock_value = opening_stock_value + stock_change_value
 
-  
+    income_total += closing_stock_value
 
+
+
+    #Purchase Expense
+
+    data = BranchPurchase.objects.filter(
+        Q(branch=branch)
+        & ~Q(purchase_type="transfer")
+        & ~Q(purchase_type="stockadd")
+        & Q(invoicedate__gte=startdate)
+        & Q(invoicedate__lte=enddate)
+    ).order_by("-pk")
+    purchaseid_set = set()
+    purchase_obj = [
+        purchase
+        for purchase in data
+        if (
+            purchase.purchaseid not in purchaseid_set
+            and not purchaseid_set.add(purchase.purchaseid)
+        )
+    ]
+
+    purchase_expense = 0
+    for items in purchase_obj:
+        purchase_expense += items.totalbillingamount
+
+    expense_total += purchase_expense 
+
+
+    data = Sale.objects.filter(Q(branch=branch)& Q(invoicedate__gte=startdate)
+        & Q(invoicedate__lte=enddate)).order_by("-pk")
+    saleid_set = set()
+    sale_obj = [
+        sale
+        for sale in data
+        if (sale.saleid not in saleid_set and not saleid_set.add(sale.saleid))
+    ]
+    sale_income = 0
+    for items in sale_obj :
+        sale_income += items.totalbillingamount
+    income_total += sale_income
+
+
+
+    # service income
+
+    service_obj =Service.objects.filter(Q(branch=branch)& Q(memodate__gte=startdate)
+        & Q(memodate__lte=enddate))
+    service_income = 0
+    for item in service_obj:
+        service_income += item.finalamount
+    income_total += service_income
+
+    # spare cost
+    # spare_cost_total = 0
+    # for item in service_obj:
+    #     spare_obj = SpareParts.objects.filter(servicerefnumber=item.servicerefnumber)
+    #     if spare_obj:
+    #         for sub_item in spare_obj:
+    #             purchase_price = sub_item.purchase_price 
+    #             purchase_tax = float(sub_item.purchase_tax)
+    #             purchase_total = purchase_price + (purchase_price * (purchase_tax / 100))
+    #             spare_cost_total += purchase_total
+
+    purchase_return = 0
+    data = PurchaseReturn.objects.filter(Q(status='Processed') & Q(branch=branch)& Q(createddate__gte=startdate)
+        & Q(createddate__lte=enddate))
+    purchase_return_set = set()
+    purchase_return_obj = [
+        purchase
+        for purchase in data
+        if (
+            purchase.purchasereturnid not in purchase_return_set
+            and not purchase_return_set.add(purchase.purchasereturnid)
+        )
+    ]
+
+    for ret in purchase_return_obj:
+        purchase_return += ret.nettotal
+    income_total += purchase_return
+
+
+
+    sale_return = 0
+    data = SaleReturn.objects.filter(Q(branch=branch)& Q(createddate__gte=startdate)
+        & Q(createddate__lte=enddate))
+    sale_return_set = set()
+    sale_return_obj = [
+        sale
+        for sale in data
+        if (
+            sale.salereturnid not in sale_return_set
+            and not sale_return_set.add(sale.salereturnid)
+        )
+    ]
+
+    for ret in sale_return_obj:
+        sale_return += ret.nettotal
+    expense_total += sale_return
+  
+    # OTHER EXPENSE
+
+    INCOME_SIDE = ['INCOMES',
+    'SALES ACCOUNT',
+    'SERVICE ACCOUNT',
+    'PURCHASE RETURN',
+    ]
+    EXPENSE_SIDE = [
+        'EXPENSES',
+        'PURCHASE ACCOUNTS',
+        'SALARY AND WAGES',
+        'SALES RETURN',
+        'TRADE EXPENSES',
+    ]
+
+    # Initialize dictionaries to store accumulated values for each account
+    income_accounts = {}
+    expense_accounts = {}
+
+    # Initialize lists for final results
+    payment_list_income = []
+    payment_list_expense = []
+    # Process all payments
+    payments_obj = Payments.objects.filter(Q(branch=branch)& Q(paymentdate__gte=startdate)
+        & Q(paymentdate__lte=enddate))
+    for pay in payments_obj:
+        debit_acc = pay.debitaccount
+        acc_key = debit_acc.replace(" ", "_")
+        acc_head = CoASubAccounts.objects.filter(description=debit_acc).first().head_root
+        
+        # Process based on account type
+        if acc_head in INCOME_SIDE:
+            # Accumulate amounts for the same account
+            if acc_key in income_accounts:
+                income_accounts[acc_key] += pay.amount
+                income_total += pay.amount
+            else:
+                income_accounts[acc_key] = pay.amount
+                income_total += pay.amount
+            
+        elif acc_head in EXPENSE_SIDE:
+            if acc_key in expense_accounts:
+                expense_accounts[acc_key] += pay.amount
+                expense_total += pay.amount
+            else:
+                expense_accounts[acc_key] = pay.amount
+                expense_total += pay.amount
+            
+
+    # Convert accumulated accounts to list format
+    for acc_key, amount in income_accounts.items():
+        payment_list_income.append({acc_key: amount})
+
+    for acc_key, amount in expense_accounts.items():
+        payment_list_expense.append({acc_key: amount})
+
+
+
+    # OTHER INCOME
+
+    # Initialize dictionaries to store accumulated values for each account
+    income_accounts = {}
+    expense_accounts = {}
+
+    # Initialize lists for final results
+    receipt_list_income = []
+    receipt_list_expense = []
+    # Process all receipts
+    receipts_obj = Receipts.objects.filter(Q(branch=branch)& Q(receiptdate__gte=startdate)
+        & Q(receiptdate__lte=enddate))
+    for receipt in receipts_obj:
+        credit_acc = receipt.creditaccount
+        acc_key = credit_acc.replace(" ", "_")
+        acc_head = CoASubAccounts.objects.filter(description=credit_acc).first().head_root
+        
+        # Process based on account type
+        if acc_head in INCOME_SIDE:
+            # Accumulate amounts for the same account
+            if acc_key in income_accounts:
+                income_accounts[acc_key] += receipt.amount
+                income_total += receipt.amount
+            else:
+                income_accounts[acc_key] = receipt.amount
+                income_total += receipt.amount
+            
+        elif acc_head in EXPENSE_SIDE:
+            if acc_key in expense_accounts:
+                expense_accounts[acc_key] += receipt.amount
+                expense_total += receipt.amount
+            else:
+                expense_accounts[acc_key] = receipt.amount
+                expense_total += receipt.amount
+            
+    # Convert accumulated accounts to list format
+    for acc_key, amount in income_accounts.items():
+        receipt_list_income.append({acc_key: amount})
+
+    for acc_key, amount in expense_accounts.items():
+        receipt_list_expense.append({acc_key: amount})
+
+
+
+    if income_total > expense_total:
+        balance = income_total - expense_total
+        balance_text = 'Net Profilt (Income > Expenses)'
+        pnl = 'Profit'
+        final = income_total
+    else:
+        balance = expense_total - income_total
+        balance_text = 'Net Loss (Expenses > Income)'
+        pnl = 'Loss'
+        final = expense_total
+    print(startdate_text,enddate_text)
     data = {
+        # "spare_cost":spare_cost_total,
+        'balance':balance,
+        'balance_text':balance_text,
+        'pnl':pnl,
+        'final':final,
+        'income_total':income_total,
+        'expense_total':expense_total,
+        'sale_return_total':sale_return,
+        "purchase_return_total":purchase_return,
         "opening_stock_value":opening_stock_value,
          "closing_stock_value":closing_stock_value,
-       
+         'purchase_expense':purchase_expense,
+         'sale_income':sale_income,
+         'service_income':service_income,
+         'payment_list_income':payment_list_income,
+    'payment_list_expense':payment_list_expense,
+    'receipt_list_income':receipt_list_income,
+    'receipt_list_expense':receipt_list_expense,
+    'startdate_text':startdate_text,
+    'enddate_text':enddate_text,
     }
 
     return render(request, "placcountnew.html", data)
