@@ -1,0 +1,286 @@
+{% extends "navbar.html" %} 
+{% load custom_filters %}
+{% block content %}
+
+
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="home-tab">
+          <div class="d-sm-flex align-items-center justify-content-between border-bottom pb-3">
+            <nav class="nav nav-borders">
+              <a class="nav-link active ps-0 pe-0 ms-0 me-3" style="color: #4555B9; border-bottom:2px solid #4555B9; font-weight: 500;" href="">
+                Brand List
+              </a>
+              <a class="nav-link ps-0 pe-0 ms-3 me-3" style="color:#444;" href="{% url 'brandform' %}">
+                Brand Entry
+              </a>  
+            </nav>
+          </div>
+          <br />
+
+          <div class="card shadow-sm mb-4" style="border-radius:8px; border:1px solid #e9ecef;">
+            <div class="card-header py-3 bg-white">
+              <h5 class="mb-0 font-weight-bold" style="color:#2c2e2f">
+                <i class="fas fa-balance-scale me-2"></i>
+                <strong>Balance Sheet</strong>
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <!-- Filter Controls -->
+              <div class="row mb-4">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label text-muted fw-semibold">From</label>
+                    <input type="date" class="form-control shadow-none" value="2024-11-15" 
+                           style="border-radius: 6px; border-color: #dee2e6;">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label text-muted fw-semibold">To</label>
+                    <input type="date" class="form-control shadow-none" value="2024-11-15"
+                           style="border-radius: 6px; border-color: #dee2e6;">
+                  </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input shadow-none" id="expandAll"
+                           style="cursor: pointer;">
+                    <label class="form-check-label text-muted fw-semibold" for="expandAll">
+                      Expand All
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                  <button class="btn btn-primary px-4 fw-semibold shadow-sm" 
+                          style="background: #4555B9; border: none; border-radius: 6px;">
+                    <i class="fas fa-file-alt me-2"></i>Generate Report
+                  </button>
+                </div>
+              </div>
+
+              <!-- Balance Tables -->
+              <div class="row">
+                <!-- Liabilities and Equity Tables -->
+                <div class="col-md-6">
+                  <!-- Liabilities Table -->
+                  <div class="table-responsive mb-4">
+                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
+                      <thead>
+                        <tr style="background-color: #f8f9fa;">
+                          <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
+                            Liabilities
+                          </th>
+                          <th class="py-3 px-4 text-end" style="width: 30%; color: #2c2e2f; font-weight: 600;">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in receipt_list_liability %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+                        {% for item in payment_list_liability %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">Account Payable</td>
+                        </tr>
+                        {% for item in account_payable_list %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">
+
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">Tax Payable</td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 px-4 align-middle">Sale Tax Payable</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ sale_tax_payable }}</td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 px-4 align-middle">Less: Tax on Sales Returns</td>
+                          <td class="py-3 px-4 text-end align-middle">({{ sale_return_tax }})</td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 px-4 align-middle">Service Tax Payable</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ service_tax_payable }}</td>
+                        </tr>
+
+
+
+
+
+
+
+
+                        <tr class="table-light fw-bold">
+                          <td class="py-3 px-4 align-middle">Total Liabilities</td>
+                          <td class="py-3 px-4 text-end align-middle">{{total_liability}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Equity Table -->
+                  <div class="table-responsive">
+                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
+                      <thead>
+                        <tr style="background-color: #f8f9fa;">
+                          <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
+                            Equity
+                          </th>
+                          <th class="py-3 px-4 text-end" style="width: 30%; color: #2c2e2f; font-weight: 600;">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in receipt_list_equity %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for item in payment_list_equity %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        <tr class="table-light fw-bold">
+                          <td class="py-3 px- align-middle">Total Equity</td>
+                          <td class="py-3 px- text-end align-middle">{{total_equity}}</td>
+                        </tr>
+                        <tr class="table-secondary fw-bold">
+                          <td class="py-3 px- align-middle">Total Liabilities and Equity</td>
+                          <td class="py-3 px- text-end align-middle">{{total_liability_equity}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Assets Table -->
+                <div class="col-md-6">
+                  <div class="table-responsive">
+                    <table class="table table-bordered" style="border: 1px solid #e9ecef;">
+                      <thead>
+                        <tr style="background-color: #f8f9fa;">
+                          <th class="py-3 px-4 fs-5" style="width: 70%; color: #2c2e2f; font-weight: 600;">
+                            Assets
+                          </th>
+                          <th class="py-3 px-4 text-end" style="width: 30%; color: #2c2e2f; font-weight: 600;">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">Cash In Hand</td>
+                        </tr>
+                        {% for item in asset %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for item in payment_list_asset %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+                        {% for item in receipt_list_asset %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px- text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">Account Receivable</td>
+                        </tr>
+
+                        {% for item in account_receivable %}
+                        {% for key, value in item.items %}
+                        <tr>
+                          <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">
+
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold fs-7 py-3">Tax Receivable</td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 px-4 align-middle">Purchase Tax Receivable</td>
+                          <td class="py-3 px-4 text-end align-middle">{{ purchase_tax_receivable }}</td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 px-4 align-middle">Less: Tax on Purchase Returns</td>
+                          <td class="py-3 px-4 text-end align-middle">({{ purchase_return_tax }})</td>
+                        </tr>
+
+
+                        
+                        <tr class="table-light fw-bold">
+                          <td class="py-3 px-4 align-middle">Total Assets</td>
+                          <td class="py-3 px-4 text-end align-middle">{{total_asset}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
