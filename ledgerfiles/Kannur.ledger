@@ -62,3 +62,12 @@
      Assets:CASH ACCOUNT:CASH ACCOUNT      5000  INR
      Income:INCOMES:Sales of old asset
 
+2024-11-19 * UINV56555 (Purchase Credit Transaction)
+     Expenses:Purchase        34500.0 INR 
+     Assets:Purchase:Cash
+     Liabilities:Purchase:AccountPayable:Rony electronics  -34500.0 INR
+
+2024-11-20 * UINV56555 (Purchase Due Transaction)
+     Liabilities:Purchase:AccountPayable:Rony electronics    34500.0 INR
+     Assets:Purchase:Cash
+

@@ -8941,7 +8941,9 @@ def daybook(request):
                     ###############
                     trans_obj =Transaction.objects.filter(transactionid=purchase_p.purchaseid)
                     is_first = False
-                    if tr==trans_obj.first():
+                    if len(trans_obj) == 1:
+                        is_first = False
+                    elif tr==trans_obj.first():
                         is_first=True
                     else:
                         is_first = False
@@ -8987,7 +8989,9 @@ def daybook(request):
                     ###############
                     trans_obj =Transaction.objects.filter(transactionid=purchase_b.purchaseid)
                     is_first = False
-                    if tr==trans_obj.first():
+                    if len(trans_obj) == 1:
+                        is_first = False
+                    elif tr==trans_obj.first():
                         is_first=True
                     else:
                         is_first = False
@@ -9035,8 +9039,11 @@ def daybook(request):
 
                     ###############
                     trans_obj =Transaction.objects.filter(transactionid=purchase.purchaseid)
+                    print("daybook",trans_obj)
                     is_first = False
-                    if tr==trans_obj.first():
+                    if len(trans_obj) == 1:
+                        is_first = False
+                    elif tr==trans_obj.first():
                         is_first=True
                     else:
                         is_first = False
