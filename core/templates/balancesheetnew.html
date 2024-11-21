@@ -165,6 +165,11 @@
                         </tr>
                         {% endfor %}
                         {% endfor %}
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">Reatained Earnings ({{retained_earnings.pnl}})</td>
+                          <td class="py-3 px- text-end align-middle">{{ retained_earnings.balance | floatformat:2 }}</td>
+                        </tr>
+
                         <tr class="table-light fw-bold">
                           <td class="py-3 px- align-middle">Total Equity</td>
                           <td class="py-3 px- text-end align-middle">{{total_equity | floatformat:2}}</td>
@@ -198,13 +203,13 @@
                           <td></td>
                         </tr>
                         {% for item in asset %}
-                        {% for key, value in item.items %}
-                        <tr>
-                          <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
-                          <td class="py-3 px-4 text-end align-middle">{{ value | floatformat:2 }}</td>
-                        </tr>
-                        {% endfor %}
-                        {% endfor %}
+                          {% for key, value in item.items %}
+                          <tr>
+                              <td class="py-3 px-4 align-middle">{{ key | replaceunderscore }}</td>
+                              <td class="py-3 px-4 text-end align-middle">{{ value }}</td>
+                          </tr>
+                          {% endfor %}
+                      {% endfor %}
                         {% for item in payment_list_asset %}
                         {% for key, value in item.items %}
                         <tr>
@@ -222,6 +227,11 @@
                         </tr>
                         {% endfor %}
                         {% endfor %}
+
+                        <tr>
+                          <td class="py-3 px- align-middle fw-bold">Closing Stock</td>
+                          <td class="py-3 px- text-end align-middle">{{ closing_stock_value | floatformat:2 }}</td>
+                        </tr>
 
 
                         <tr>

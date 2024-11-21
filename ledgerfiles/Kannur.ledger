@@ -1,73 +1,23 @@
-2024-11-20 * INV878373434 (Purchase Transaction)
-     Expenses:Purchase        9200.0  INR 
+2024-11-21  *  Owners Capital  (Receipt) 
+     Assets:CASH ACCOUNT:CASH ACCOUNT      20000  INR
+     Equity:SHARE CAPITAL:Owners Capital
+
+2024-11-21 * INV989899 (Purchase Transaction)
+     Expenses:Purchase        212750.0  INR 
      Assets:Purchase:Cash 
 
-2024-11-20 * INV-24111 (Sale Transaction)
-    Assets:Sale:Cash              345.0 INR
+2024-11-21  *  owners capital 2nd  (Receipt) 
+     Assets:CASH ACCOUNT:CASH ACCOUNT      300000  INR
+     Equity:SHARE CAPITAL:Owners Capital
+
+2024-11-21 * INV-24111 (Sale Transaction)
+    Assets:Sale:Cash              4945.0 INR
     Income:Sale
-    Liabilities:Sale:TaxPayable      -45.0  INR
+    Liabilities:Sale:TaxPayable      -645.0  INR
 
-2024-11-20 * INV-24112 (Sale Credit Transaction)
-    Assets:Sale:Cash              0.0 INR
-    Assets:Sale:AccountReceivable:jishnu        575.0 INR
+2024-11-21 * INV-24112 (Sale Credit Transaction)
+    Assets:Sale:Card              0.0 INR
+    Assets:Sale:AccountReceivable:sample customer        4025.0 INR
     Income:Sale
-    Liabilities:Sale:TaxPayable                                   -75.0  INR
-
-2024-11-20 * SR1 (Service Transaction)
-    Assets:Service:Cash   545.0 INR
-    Income:Service
-    Liabilities:Service:TaxPayable                     -60.0   INR
-
-2024-11-20 * INV8778444433 (Purchase Transaction)
-     Expenses:Purchase        69000.0  INR 
-     Assets:Purchase:Cash 
-
-2024-11-20 * INV8778444433 (Purchase Return Transaction)
-     Assets:PurchaseReturn:Cash      69000.0 INR 
-     Income:PurchaseReturn
-
-2024-11-20 * INV-24114 (Sale Transaction)
-    Assets:Sale:Cash              345.0 INR
-    Income:Sale
-    Liabilities:Sale:TaxPayable      -45.0  INR
-
-2024-11-20 * INV-24114 (Sale Return Transaction)
-     Expenses:SaleReturn:Cash       345.0 INR
-     Assets:SaleReturn
-     Liabilities:Sale:TaxPayable      45.0  INR
-
-2024-11-20 * INV-24115 (Sale Transaction)
-    Assets:Sale:Cash              2300.0 INR
-    Income:Sale
-    Liabilities:Sale:TaxPayable      -300.0  INR
-
-2024-11-20 * INV-24116 (Sale Transaction)
-    Assets:Sale:Cash              2300.0 INR
-    Income:Sale
-    Liabilities:Sale:TaxPayable      -300.0  INR
-
-2024-11-20 * INV8787555 (Purchase Transaction)
-     Expenses:Purchase        34500.0  INR 
-     Assets:Purchase:Cash 
-
-2024-11-20 * inv76844444 (Purchase Transaction)
-     Expenses:Purchase        1000.04  INR 
-     Assets:Purchase:Cash 
-
-2024-11-20   *  Tea Expense (Payment) 
-     Expenses:EXPENSES:Tea Expense     900 INR
-     Assets:CASH ACCOUNT:CASH ACCOUNT
-
-2024-11-20  *  Sales of old asset  (Receipt) 
-     Assets:CASH ACCOUNT:CASH ACCOUNT      5000  INR
-     Income:INCOMES:Sales of old asset
-
-2024-11-19 * UINV56555 (Purchase Credit Transaction)
-     Expenses:Purchase        34500.0 INR 
-     Assets:Purchase:Cash
-     Liabilities:Purchase:AccountPayable:Rony electronics  -34500.0 INR
-
-2024-11-20 * UINV56555 (Purchase Due Transaction)
-     Liabilities:Purchase:AccountPayable:Rony electronics    34500.0 INR
-     Assets:Purchase:Cash
+    Liabilities:Sale:TaxPayable                                   -525.0  INR
 
